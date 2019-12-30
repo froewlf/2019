@@ -81,3 +81,9 @@
 * feign 封装了ribbon和hystrix
 * feign自身是一个声明式的伪http客户端，写起来更加思路清晰和方便
 * feign是一个采用基于接口的注解的编程方式，更加简单。
+
+#### 10、SpringBoot注解方式加载配置文件
+* @configuration ： 声明当前类做配置类使用
+* @Bean ： 声明在方法上，将方法的返回值加入bean容器
+* @value ： 属性值注入
+* @PropertySource ： 指定外部待加载文件
