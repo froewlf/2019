@@ -98,3 +98,6 @@
 * 解决死锁
   * 通过redis中expire()给锁设定最大持有时间，如果超过，则redis来帮我们释放锁。
   * 使用setnx key “当前系统时间+锁持有的时间” 和getset key “当前系统时间 + 锁持有时间” 组合命令就可以实现。
+  
+#### 11、[redisson分布式锁实现][https://blog.csdn.net/shuangyueliao/article/details/89344256]
+
