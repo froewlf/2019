@@ -63,6 +63,13 @@
     * **两次扫描算法**：首先根据条件取出排序字段和指针信息，在排序区中排序，完成排序后，根据行指针回表读取记录。
     * **一次扫描算法**：一次性取出满足条件的所有字段在排序区排序后直接输出结果。
   * 可以提高**sort_buffer_size**和**max_length_for_sort_data**系统变量，增大排序区大小，调高排序效率
+  * 注意
+    * 查询字段跟order by 字段必须一致，索引才能命中
+      * select order_no from tab order by order_no desc;
+    * 一次查询索引只使用一次，故where 条件命中索引后，order by 列 索引就不会在命中
+      * select order_no from tab where id > 1000 order by  order_no DESC
+    * 如果多个列值进行排序，需要创建联合索引，并保证满足最左前缀， 并且是相同的排序规则
+      * select order_no，order_status where tab order by order_no desc，order_status desc;
 
 * **group by 优化**
 
