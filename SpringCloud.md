@@ -87,3 +87,6 @@
 * @Bean ： 声明在方法上，将方法的返回值加入bean容器
 * @value ： 属性值注入
 * @PropertySource ： 指定外部待加载文件
+
+#### 11、SpringBoot 启动流程
+* <https://www.cnblogs.com/trgl/p/7353782.html>
