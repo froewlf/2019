@@ -1,6 +1,22 @@
 #### 1、为什么说redis是单线程的？
 
-* redis内部使用文件事件处理器，这个文件事件处理器是单线程的，所以redis才叫做单线程模型
+* Redis基于Reactor模式开发了网络事件处理器，这个处理器被称为文件处理器。它的组成机构分为4部分：多个Socket（套接字）、IO多路复用程序、文件事件分派器、事件处理器。因为文件事件分派器队列的消费是单线程的，所以redis才叫单线程。
+  * 什么是Reactor模式？
+    * Reactor是基于NIO中实现多路复用的一种模式。
+    * ![img](https://upload-images.jianshu.io/upload_images/13078107-0096aa4376530d03.png?imageMogr2/auto-orient/strip|imageView2/2/w/619/format/webp)
+    * 同步的等待多个事件源到达（采用select()实现）
+    * 将事件多路分解以及分配响应的事件服务进行处理，这个分派采用server集中处理（dispatch）
+    * 分解的事件以及对应的事件服务应用从分派服务中分离出去（handler）
+  * redis线程模型
+  * ![img](https://upload-images.jianshu.io/upload_images/7368936-fe23b577eef07aa3.png?imageMogr2/auto-orient/strip|imageView2/2/w/1200/format/webp)
+  * IO多路复用程序监听多个Socket，将socket事件放入到一个先进先出的队列，文件事件分派器**单线程消费**队列中的事件，根据事件的不同再分派给不同的事件处理器。
+
+* 单线程的redis足够快了，使用多线程麻烦。CPU不是redis的瓶颈，**内存**和**网络带宽**才是redis的瓶颈。
+  * 内存：关系到redis存储的数据量
+  * 网络带宽：
+    * redis客户端执行一条命令分为4个过程：**发送命令**、**命令排队**、**命令执行**、**返回结果**。
+    * 其中**发送命令**+**返回结果**，这一过程被称为**Round Trip Time（RTT，往返时间）**。
+    * RTT，往返时间的耗时会影响redis的吞吐量。
 
 #### 2、redis为什么快？
 
@@ -11,7 +27,7 @@
   * 多路I/O复用模型是利用select、poll、epoll可以同时监察多个流的I/O事件的能力，在空闲的时候会把当前线程阻塞掉，当有一个或多个流有I/O事件时，就从阻塞状态中唤醒，于是程序就会轮询一遍所有的流（epoll是只轮询那些真正发生了事件的流），并且只依次顺序的处理就绪的流，这种做法就避免了大量的无用操作。**这里“多路”指的是多个网络连接，“复用”指的是复用同一个线程**。
   * redis的io模型主要是基于epoll实现的，不过他也提供了select和kqueue的实现，默认采用epoll。
     * epoll优点
-      * epoll灭有最大并发连接的限制，上限时最大可以打开文件的数目，这个数字一般远大于2048，一般来说这个数目和系统内存关系很大，具体数目可以cat/proc/sys/fs/file-max查看
+      * epoll没有最大并发连接的限制，上限时最大可以打开文件的数目，这个数字一般远大于2048，一般来说这个数目和系统内存关系很大，具体数目可以cat/proc/sys/fs/file-max查看
       * 效率提升，Epoll最大的有点就在于它**只管“活跃”的连接**，而跟连接总数无关，因此在实际的网络环境中，Epoll的效率就会远远高于select和poll
       * 内存拷贝，Epoll在这点上使用了**内存共享**，这个内存拷贝也省略了。
 

@@ -12,6 +12,7 @@
 
 * Springboot 是一个快速整合第三方框架，关注的是微观具体快速方便的开发单个个体的服务，是对spring应用的简化，使用特定的方式进行配置（properties或yml）配置，无须war包在tomcat下运行，直接运行jar包。
 * SpringCloud 关注的是宏观  关注全局微服务协调整体治理框架，将Springboot开发的一个个单体服务整合并管理起来，为各个微服务之间提供，配置管理、服务发现、路由、熔断等集成服务。
+* SpringMVC 是一个基于spring的web开发框架。
 
 #### 4、SpringCloudEureKa
 
@@ -184,9 +185,29 @@
 * @PropertySource ： 指定外部待加载文件
 
 #### 11、SpringBoot 启动流程
+
+* SpringApplication模块初始化
+* 实现具体的启动方案和加载上下文模块
+* 加载自动化配置模块
+
 * <https://www.cnblogs.com/trgl/p/7353782.html>
 
 #### 12、微服务架构需要保证两点
 
 * 首先hystrix资源隔离以及超时这块，必须设置合理的参数，避免高峰期，频繁的hystrix线程卡死
 * 其次，针对个别的服务故障，要设置合理的降级策略，保证各个服务挂了，可以合理的降级，系统整体可用。
+
+#### 13、RPC服务远程调用
+
+* RPC的全称是Remote Procedure Call（远程过程调用）是一种进程间通信方式。它允许程序调用另一个地址空间（通常是共享网络的另一台机器上）的过程或函数，而不用程序员显示编码这个远程调用的细节。即程序员无论是调用本地还是远程，本质上编写的调用代码基本相同。
+
+### 14、SpringMVC 执行流程
+
+* DisPatcherServlet（前置控制器）拦截请求并解析url
+* DisPatcherServlet调用HandlerMapping，HandleMapping调用HandleExecution根据url查找控制器，然后返回给DisPatcherServlet
+* DisPatcherServlet再调用HandlerAdapter（处理器适配器），按照特定的规则去执行Handler（执行具体的Controller）。
+* Controller执行后将具体的执行信息返回给HandlerAdapter，然后再返回给DispatcherServlet
+* DisPatcherServlet调用视图解析器来解析HandlerAdapter传递的逻辑视图。
+* DisPatcherServlet根据视图解析器解析的视图结果，调用具体的视图，最终视图呈现给用户。
+
+### 15、
