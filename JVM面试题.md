@@ -149,6 +149,12 @@
   * jhat，JVM Heap Analysis Tool命令是与jmap搭配使用，用来分析jmap生成的dump，jhat内置了一个微型的HTTP/HTML服务器，生成dump的分析结果后，可以在浏览器中查看
   * jstack，用于生成java虚拟机当前时刻的线程快照。
   * jinfo，JVM Configuration info 这个命令作用是实时查看和调整虚拟机运行参数。
+* 内存调优的过程
+  * OOM 发生的原因
+    * 堆内存不足
+      * 使用-Xmx参数增加内存大小
+    * GC效率低
+      * jmap、jstack打出堆栈信息，查找问题代码
 
 #### 12、java内存模型
 
@@ -238,3 +244,44 @@
 
 * 注解本质是一个继承了Annotation的特殊接口，其具体实现类是Java运行时生成的动态代理类。程序运行时，通过反射获取类中所有的属性和方法上的注解，这个注解是动态代理对象$Proxy1。通过代理对象电泳注解中自定义的方法，完成注解功能。
 
+### 19、发生OOM的原因，即解决办法
+
+* Java堆空间
+  * 造成原因
+    * 无法在Java堆中分配对象
+    * 吞吐量增加
+    * 对象无法被回收
+    * 应该程序过度使用finalizer。finalizer对象不能被GC立刻回收。finalizer由结束队列服务的守护线程调用，有时finalizer线程的处理能力无法跟上结束队列的增长。
+  * 解决方案
+    * 使用-Xmx增加堆大小
+    * 修复程序中存在的内存泄漏
+
+* GC开销超过限制
+  * 造成原因
+    * GC垃圾回收效率低下
+  * 解决方法
+    * 使用-Xmx增加堆大小
+    * 使用-XX：-UserGCOverheadLimit取消GC开销限制
+    * 修复应用程序中的内存泄漏
+
+* 排查问题
+  * OOM分为堆中内存溢出和元空间（栈）内存溢出
+  * jps查询当前有哪些Java进程，获取该Java进程的id后再对该进程进行处理
+  * jstack主要用来查看某个java进程内的线程堆栈信息。
+  * jmap 导出堆内存，然后使用jhat来进行分析
+
+### 20、java死锁排查
+
+* 使用jps + jstack
+* jps -l 
+* jstack -l pid
+
+### 21、Java CPU 100% 排查
+
+* 使用top命令查看cpu占用资源较高的PID
+* 通过jps找到当前用户下的java程序的PID
+* 使用 pidstat -p 1 3 -u -t
+* 找到cpu占用较高的线程TID
+* 将TID转换为十六进制的表示方式
+* 通过jstack -l 输出当前进程的线程信息
+* 查找TID对应的线程（输出的线程id为十六进制），找到对应的代码
